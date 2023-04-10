@@ -59,6 +59,26 @@ const TodoList = () => {
       );
   };
 
+  const deleteTodo = ({ id }: TodoItem) => {
+    axios
+      .delete(`https://www.pre-onboarding-selection-task.shop/todos/${id}`, {
+        headers,
+      })
+      .then(() => setTodoList(todoList.filter(todo => todo.id !== id)));
+  };
+
+  const modifyTodo = ({ id, todo, isCompleted }: TodoItem) => {
+    axios
+      .put(
+        `https://www.pre-onboarding-selection-task.shop/todos/${id}`,
+        { todo, isCompleted },
+        { headers },
+      )
+      .then(res =>
+        setTodoList(todoList.map(todo => (todo.id === id ? res.data : todo))),
+      );
+  };
+
   return (
     <div>
       <h1>Todo List</h1>
@@ -69,13 +89,19 @@ const TodoList = () => {
           onChange={onChangeTodo}
           value={todo}
         />
-        <button data-testid="new=todo-add-button" type="submit">
+        <button data-testid="new-todo-add-button" type="submit">
           추가
         </button>
       </form>
       <ul>
         {todoList.map(todo => (
-          <Todo key={todo.id} todo={todo} toggleTodo={toggleTodo} />
+          <Todo
+            key={todo.id}
+            todo={todo}
+            toggleTodo={toggleTodo}
+            deleteTodo={deleteTodo}
+            modifyTodo={modifyTodo}
+          />
         ))}
       </ul>
     </div>
@@ -85,12 +111,44 @@ const TodoList = () => {
 type TodoProps = {
   todo: TodoItem;
   toggleTodo: (todo: TodoItem) => void;
+  deleteTodo: (todo: TodoItem) => void;
+  modifyTodo: (todo: TodoItem) => void;
 };
 
-const Todo = ({ todo, toggleTodo }: TodoProps) => {
+const Todo = ({ todo, toggleTodo, deleteTodo, modifyTodo }: TodoProps) => {
   const [isModify, setIsModify] = useState(false);
 
   return !isModify ? (
+    <TodoInfo
+      todo={todo}
+      toggleTodo={toggleTodo}
+      deleteTodo={deleteTodo}
+      setIsModify={setIsModify}
+    />
+  ) : (
+    <TodoModify
+      todo={todo}
+      toggleTodo={toggleTodo}
+      modifyTodo={modifyTodo}
+      setIsModify={setIsModify}
+    />
+  );
+};
+
+type TodoInfoProps = {
+  todo: TodoItem;
+  toggleTodo: (todo: TodoItem) => void;
+  deleteTodo: (todo: TodoItem) => void;
+  setIsModify: (isModify: boolean) => void;
+};
+
+const TodoInfo = ({
+  todo,
+  toggleTodo,
+  deleteTodo,
+  setIsModify,
+}: TodoInfoProps) => {
+  return (
     <li>
       <label>
         <input
@@ -103,22 +161,54 @@ const Todo = ({ todo, toggleTodo }: TodoProps) => {
       <button data-testid="modify-button" onClick={() => setIsModify(true)}>
         수정
       </button>
-      <button data-testid="delete-button">삭제</button>
+      <button data-testid="delete-button" onClick={() => deleteTodo(todo)}>
+        삭제
+      </button>
     </li>
-  ) : (
+  );
+};
+
+type TodoModifyProps = {
+  todo: TodoItem;
+  toggleTodo: (todo: TodoItem) => void;
+  modifyTodo: (todo: TodoItem) => void;
+  setIsModify: (isModify: boolean) => void;
+};
+
+const TodoModify = ({
+  todo,
+  toggleTodo,
+  modifyTodo,
+  setIsModify,
+}: TodoModifyProps) => {
+  const { value, onChange } = useInput(todo.todo);
+
+  return (
     <li>
       <input
         type="checkbox"
         checked={todo.isCompleted}
         onChange={() => toggleTodo(todo)}
       />
-      <input data-testid="modify-input" type="text" />
-      <button data-testid="submit-button">제출</button>
+      <input
+        data-testid="modify-input"
+        type="text"
+        value={value}
+        onChange={onChange}
+      />
+      <button
+        data-testid="submit-button"
+        onClick={() => {
+          modifyTodo({ ...todo, todo: value });
+          setIsModify(false);
+        }}
+      >
+        제출
+      </button>
       <button data-testid="cancel-button" onClick={() => setIsModify(false)}>
         취소
       </button>
     </li>
   );
 };
-
 export default TodoList;
