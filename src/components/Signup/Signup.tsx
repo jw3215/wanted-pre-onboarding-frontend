@@ -1,7 +1,16 @@
 import axios from 'axios';
 import useInput from '../../hooks/useInput';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { hasToken } from '../../auth/auth';
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (hasToken()) navigate('/todo');
+  }, [navigate]);
+
   const {
     value: email,
     onChange: onChangeEmail,
@@ -14,10 +23,17 @@ const SignUp = () => {
   } = useInput('');
 
   const handleSubmit = () => {
-    axios.post('https://www.pre-onboarding-selection-task.shop/auth/signup', {
-      email,
-      password,
-    });
+    axios
+      .post('https://www.pre-onboarding-selection-task.shop/auth/signup', {
+        email,
+        password,
+      })
+      .then(res => {
+        if (res.status === 201) {
+          alert('회원가입이 완료되었습니다.');
+          navigate('/signin');
+        }
+      });
 
     resetEmail();
     resetPassword();

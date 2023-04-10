@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import useInput from '../../hooks/useInput';
 import axios from 'axios';
+import { hasToken, setToken } from '../../auth/auth';
+import { useNavigate } from 'react-router-dom';
 
 const SignIn = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (hasToken()) navigate('/todo');
+  }, [navigate]);
+
   const {
     value: email,
     onChange: onChangeEmail,
@@ -15,10 +23,20 @@ const SignIn = () => {
   } = useInput('');
 
   const handleSubmit = () => {
-    axios.post('https://www.pre-onboarding-selection-task.shop/auth/signin', {
-      email,
-      password,
-    });
+    axios
+      .post('https://www.pre-onboarding-selection-task.shop/auth/signin', {
+        email,
+        password,
+      })
+      .then(res => {
+        setToken(res.data.access_token);
+        navigate('/todo');
+      })
+      .catch(err =>
+        err.response.status === 401 || err.response.status === 404
+          ? alert('이메일 또는 비밀번호가 틀렸습니다.')
+          : alert('unexpected error'),
+      );
 
     resetEmail();
     resetPassword();
