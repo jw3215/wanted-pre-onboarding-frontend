@@ -3,7 +3,7 @@ import './App.css';
 import { Route, Routes } from 'react-router-dom';
 import SignUp from './components/Signup/Signup';
 import SignIn from './components/Signin/Signin';
-import Todo from './components/Todo/Todo';
+import TodoList from './components/Todo/Todo';
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
         ></Route>
         <Route path="/signup" Component={SignUp} />
         <Route path="/signin" Component={SignIn} />
-        <Route path="/todo" Component={Todo} />
+        <Route path="/todo" Component={TodoList} />
       </Routes>
     </div>
   );
