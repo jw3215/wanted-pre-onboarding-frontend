@@ -11,15 +11,15 @@ function App() {
       <Routes>
         <Route
           path="/"
-          Component={() => (
+          element={
             <div>
               <h1>root</h1>
             </div>
-          )}
+          }
         ></Route>
-        <Route path="/signup" Component={SignUp} />
-        <Route path="/signin" Component={SignIn} />
-        <Route path="/todo" Component={TodoList} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/todo" element={<TodoList />} />
       </Routes>
     </div>
   );

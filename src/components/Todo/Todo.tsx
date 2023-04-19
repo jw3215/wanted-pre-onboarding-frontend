@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken, hasToken } from '../../auth/auth';
 import useInput from '../../hooks/useInput';
@@ -19,7 +19,10 @@ const TodoList = () => {
     resetValue: resetTodo,
   } = useInput('');
 
-  const headers = { authorization: `Bearer ${getToken()}` };
+  const headers = useMemo(
+    () => ({ authorization: `Bearer ${getToken()}` }),
+    [],
+  );
 
   const [todoList, setTodoList] = useState<TodoItem[]>([]);
 
@@ -28,12 +31,13 @@ const TodoList = () => {
   }, [navigate]);
 
   useEffect(() => {
-    axios
-      .get('https://www.pre-onboarding-selection-task.shop/todos', {
-        headers,
-      })
-      .then(res => setTodoList(res.data));
-  }, []);
+    if (hasToken())
+      axios
+        .get('https://www.pre-onboarding-selection-task.shop/todos', {
+          headers,
+        })
+        .then(res => setTodoList(res.data));
+  }, [headers]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
